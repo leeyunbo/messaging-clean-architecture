@@ -1,5 +1,7 @@
 package com.messaging.common.domain
 
+import org.hibernate.internal.util.collections.CollectionHelper.listOf
+
 enum class MessageStatus(val description: String) {
     // 초기 상태
     RECEIVED("접수됨"),

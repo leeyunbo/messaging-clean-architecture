@@ -4,6 +4,7 @@ import com.messaging.common.converter.JsonMapConverter
 import com.messaging.common.id.MessageIdGenerator
 import jakarta.persistence.*
 import java.time.LocalDateTime
+import java.util.Collections.emptyMap
 
 /**
  * 발송 메시지 Entity

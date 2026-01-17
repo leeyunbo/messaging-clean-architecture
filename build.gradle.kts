@@ -32,6 +32,9 @@ subprojects {
         // Kotlin
         "implementation"("org.jetbrains.kotlin:kotlin-reflect")
 
+        // Logging
+        "implementation"("io.github.microutils:kotlin-logging-jvm:3.0.5")
+
         // Reactor Kotlin Extensions
         "implementation"("io.projectreactor.kotlin:reactor-kotlin-extensions")
 
