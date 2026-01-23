@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: sms-sender
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/messaging
+    username: postgres
+    password: postgres
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  virtual-host: /
+
+consumer:
+  prefetch-count: 10
+
+webclient:
+  connect-timeout: 5000
+  read-timeout: 10000
+  write-timeout: 10000
+
+platform:
+  skt:
+    base-url: https://api.skt.com
+    api-key: ${SKT_API_KEY:}
+    timeout: 10000
+    enabled: true
+  kt:
+    base-url: https://api.kt.com
+    api-key: ${KT_API_KEY:}
+    timeout: 10000
+    enabled: true
+  lgt:
+    base-url: https://api.lguplus.com
+    api-key: ${LGT_API_KEY:}
+    timeout: 10000
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.messaging: DEBUG
+    org.springframework.r2dbc: DEBUG

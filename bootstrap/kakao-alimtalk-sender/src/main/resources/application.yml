@@ -1,0 +1,40 @@
+server:
+  port: 10001
+
+spring:
+  application:
+    name: kakao-alimtalk-sender
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+  r2dbc:
+    url: ${DB_URL:r2dbc:h2:mem:///testdb}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+
+partner:
+  id: ${PARTNER_ID:default}
+
+rabbitmq:
+  queue: alimtalk-send-queue-${partner.id}
+  report:
+    exchange: report-exchange
+    routing-key: report
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    circuitbreakers:
+      enabled: false
+
+# Resilience4j actuator 비활성화 (Jackson 2 의존성 없음)
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator: false

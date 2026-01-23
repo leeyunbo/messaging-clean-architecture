@@ -10,7 +10,7 @@ plugins {
 
 allprojects {
     group = "com.messaging"
-    version = "0.0.1-SNAPSHOT"
+    version = "1.0.0-SNAPSHOT"
 
     repositories {
         mavenCentral()
@@ -22,9 +22,11 @@ subprojects {
     apply(plugin = "kotlin-spring")
     apply(plugin = "io.spring.dependency-management")
 
+
     the<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension>().apply {
         imports {
             mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.1")
+            mavenBom("io.github.resilience4j:resilience4j-bom:2.2.0")
         }
     }
 
@@ -60,4 +62,9 @@ subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
     }
+}
+
+// Bootstrap 모듈에 Spring Boot 플러그인 적용
+configure(subprojects.filter { it.path.startsWith(":bootstrap:") }) {
+    apply(plugin = "org.springframework.boot")
 }

@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: reporter
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/messaging
+    username: postgres
+    password: postgres
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  virtual-host: /
+
+consumer:
+  prefetch-count: 10
+
+webclient:
+  connect-timeout: 5000
+  read-timeout: 10000
+  write-timeout: 10000
+
+server:
+  port: 8090
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.messaging: DEBUG
