@@ -11,12 +11,12 @@
 
 | 레이어 | 설명 |
 |--------|------|
-| `core/` | 도메인 모델, 포트 인터페이스 |
-| `usecase/` | 비즈니스 로직 |
-| `platform/` | 외부 API 어댑터 |
-| `infrastructure/` | 기술 구현 (RabbitMQ, DB, WebClient) |
-| `library/` | 공통 유틸리티 |
-| `bootstrap/` | 실행 애플리케이션 |
+| `message-core/` | 도메인 모델, 포트 인터페이스 |
+| `message-usecase/` | 비즈니스 로직 |
+| `message-platform/` | 외부 API 어댑터 |
+| `message-infrastructure/` | 기술 구현 (RabbitMQ, DB, WebClient) |
+| `message-library/` | 공통 유틸리티 |
+| `message-bootstrap/` | 실행 애플리케이션 |
 
 ## 의존성 방향
 

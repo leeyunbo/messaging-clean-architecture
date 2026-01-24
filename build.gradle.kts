@@ -65,6 +65,6 @@ subprojects {
 }
 
 // Bootstrap 모듈에 Spring Boot 플러그인 적용
-configure(subprojects.filter { it.path.startsWith(":bootstrap:") }) {
+configure(subprojects.filter { it.path.startsWith(":message-bootstrap:") }) {
     apply(plugin = "org.springframework.boot")
 }
