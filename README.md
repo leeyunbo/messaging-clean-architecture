@@ -1,4 +1,4 @@
-# Messaging Platform
+# Messaging Clean Architecture
 
 ## 프로젝트 배경
 
