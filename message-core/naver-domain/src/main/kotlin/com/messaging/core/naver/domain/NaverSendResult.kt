@@ -1,36 +1,33 @@
 package com.messaging.core.naver.domain
 
-/**
- * 네이버 발송 결과
- */
 data class NaverSendResult(
     val success: Boolean,
-    val resultCode: String?,
-    val resultMessage: String?,
-    val requestId: String? = null,
-    val retryable: Boolean = false
+    val resultCode: String? = null,
+    val resultMessage: String? = null,
+    val requestId: String? = null
 ) {
     companion object {
-        fun success(code: String = "202", message: String = "Accepted", requestId: String? = null) = NaverSendResult(
+        fun success(requestId: String? = null) = NaverSendResult(
             success = true,
-            resultCode = code,
-            resultMessage = message,
-            requestId = requestId,
-            retryable = false
+            requestId = requestId
         )
 
         fun fail(code: String, message: String) = NaverSendResult(
             success = false,
             resultCode = code,
-            resultMessage = message,
-            retryable = false
+            resultMessage = message
         )
 
-        fun retryable(code: String, message: String) = NaverSendResult(
+        fun unknownError() = NaverSendResult(
             success = false,
-            resultCode = code,
-            resultMessage = message,
-            retryable = true
+            resultCode = "9999",
+            resultMessage = "UNKNOWN_ERROR"
+        )
+
+        fun naverApiError() = NaverSendResult(
+            success = false,
+            resultCode = "9998",
+            resultMessage = "NAVER_API_ERROR"
         )
     }
 }

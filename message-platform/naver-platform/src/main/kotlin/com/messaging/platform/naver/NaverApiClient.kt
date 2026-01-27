@@ -28,11 +28,10 @@ class NaverApiClient(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    suspend fun <T : Any> send(
+    suspend fun send(
         path: String,
-        request: T,
-        messageId: String,
-        messageType: String
+        request: Any,
+        messageId: String
     ): NaverSendResult {
         val timestamp = System.currentTimeMillis().toString()
         val signature = makeSignature(path, timestamp)
@@ -52,28 +51,24 @@ class NaverApiClient(
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .awaitSingleOrNull()
 
-            handleResponse(response, messageId, messageType)
+            handleResponse(response, messageId)
         } catch (e: WebClientResponseException) {
             log.error("HTTP error from Naver API: messageId={}, status={}", messageId, e.statusCode)
             NaverSendResult.fail("HTTP_${e.statusCode.value()}", e.responseBodyAsString.ifBlank { "HTTP error" })
         } catch (e: Exception) {
-            log.error("Failed to send {} via Naver: messageId={}, error={}", messageType, messageId, e.message)
-            NaverSendResult.fail("EXCEPTION", e.message ?: "Unknown error")
+            log.error("Failed to send via Naver: messageId={}, error={}", messageId, e.message)
+            NaverSendResult.naverApiError()
         }
     }
 
-    private fun handleResponse(
-        response: NaverResponse?,
-        messageId: String,
-        messageType: String
-    ): NaverSendResult {
+    private fun handleResponse(response: NaverResponse?, messageId: String): NaverSendResult {
         if (response == null) {
             return NaverSendResult.fail("EMPTY_RESPONSE", "Empty response from Naver")
         }
 
         if (response.isSuccess()) {
-            log.info("{} sent successfully via Naver: messageId={}", messageType, messageId)
-            return NaverSendResult.success(response.statusCode, response.statusName, response.requestId)
+            log.info("Sent successfully via Naver: messageId={}", messageId)
+            return NaverSendResult.success(response.requestId)
         }
 
         log.warn("Naver API returned error: messageId={}, code={}", messageId, response.statusCode)
@@ -82,8 +77,7 @@ class NaverApiClient(
 
     private fun makeSignature(path: String, timestamp: String): String {
         val message = buildString {
-            append("POST")
-            append(" ")
+            append("POST ")
             append(path)
             append("\n")
             append(timestamp)
