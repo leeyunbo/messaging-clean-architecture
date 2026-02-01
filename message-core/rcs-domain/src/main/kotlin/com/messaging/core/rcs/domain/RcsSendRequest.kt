@@ -1,14 +1,16 @@
 package com.messaging.core.rcs.domain
 
-/**
- * RCS 단일 메시지 발송 요청
- */
+sealed class RcsSendRequest {
+    abstract val messageId: String
+    abstract val recipient: String
+}
+
 data class RcsStandaloneRequest(
-    val messageId: String,
-    val recipient: String,
+    override val messageId: String,
+    override val recipient: String,
     val content: String,
     val buttons: List<RcsButton> = emptyList()
-) {
+) : RcsSendRequest() {
     init {
         require(recipient.matches(Regex("^01[0-9]{8,9}$"))) {
             "Invalid phone number format: $recipient"
@@ -19,14 +21,11 @@ data class RcsStandaloneRequest(
     }
 }
 
-/**
- * RCS 캐러셀 메시지 발송 요청
- */
 data class RcsCarouselRequest(
-    val messageId: String,
-    val recipient: String,
+    override val messageId: String,
+    override val recipient: String,
     val cards: List<RcsCard>
-) {
+) : RcsSendRequest() {
     init {
         require(recipient.matches(Regex("^01[0-9]{8,9}$"))) {
             "Invalid phone number format: $recipient"

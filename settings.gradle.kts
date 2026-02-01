@@ -33,7 +33,8 @@ include(
 // ============================================
 include(
     "message-library:id-generator",
-    "message-library:logging"
+    "message-library:logging",
+    "message-library:webhook"
 )
 
 // ============================================
@@ -57,7 +58,8 @@ include(
     "message-platform:lgt-platform",
     "message-platform:kakao-platform",
     "message-platform:kakao-direct-platform",
-    "message-platform:naver-platform"
+    "message-platform:naver-platform",
+    "message-platform:rcs-platform"
 )
 
 
@@ -77,6 +79,7 @@ include(
     // RCS
     "message-bootstrap:rcs-receiver",
     "message-bootstrap:rcs-sender",
+    "message-bootstrap:rcs-webhook",
 
     // 카카오
     "message-bootstrap:kakao-receiver",           // 알림톡 + 브랜드메시지 공통 수신

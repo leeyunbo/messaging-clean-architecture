@@ -1,0 +1,17 @@
+server:
+  port: 10006
+
+spring:
+  application:
+    name: rcs-sender
+
+rabbitmq:
+  queue: rcs-send-queue
+
+platform:
+  rcs:
+    enabled: true
+    base-url: https://rcs-api.example.com
+    api-key: ${RCS_API_KEY:}
+    brand-id: ${RCS_BRAND_ID:}
+    timeout: 10000

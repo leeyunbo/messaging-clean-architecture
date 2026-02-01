@@ -1,5 +1,5 @@
 plugins {
-    id("usecase-conventions")
+    id("platform-conventions")
 }
 
 dependencies {

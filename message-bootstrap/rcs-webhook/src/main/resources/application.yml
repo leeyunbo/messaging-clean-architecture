@@ -1,0 +1,10 @@
+server:
+  port: 10007
+
+spring:
+  application:
+    name: rcs-webhook
+
+webhook:
+  rcs:
+    secret-key: ${RCS_WEBHOOK_SECRET:}
