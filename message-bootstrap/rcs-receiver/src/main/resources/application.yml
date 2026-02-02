@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: rcs-receiver
+
+server:
+  netty:
+    port: 10008
+
+rabbitmq:
+  queue: rcs-send-queue
