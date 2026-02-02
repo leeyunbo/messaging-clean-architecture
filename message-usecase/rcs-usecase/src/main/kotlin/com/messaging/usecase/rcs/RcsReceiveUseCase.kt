@@ -1,7 +1,11 @@
 package com.messaging.usecase.rcs
 
+import com.messaging.core.rcs.domain.PhoneNumber
+import com.messaging.core.rcs.domain.RcsButton
+import com.messaging.core.rcs.domain.RcsCard
 import com.messaging.core.rcs.domain.RcsMessagePublisher
 import com.messaging.core.rcs.domain.RcsQueueMessage
+import com.messaging.core.rcs.domain.RcsReceiveMessage
 import com.messaging.library.idgen.MessageIdGenerator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -13,41 +17,22 @@ class RcsReceiveUseCase(
     private val log = LoggerFactory.getLogger(javaClass)
 
     suspend fun receive(request: RcsReceiveRequest): ReceiveResult {
-        // 검증
-        if (!isValidRecipient(request.recipient)) {
-            return ReceiveResult.failure("4001", "Invalid recipient")
-        }
-
-        if (request.type == "STANDALONE" && request.content.isNullOrBlank()) {
-            return ReceiveResult.failure("4002", "Content is required for standalone message")
-        }
-
-        if (request.type == "CAROUSEL" && request.cards.isEmpty()) {
-            return ReceiveResult.failure("4003", "Cards are required for carousel message")
+        val message = try {
+            request.toDomainModel()
+        } catch (e: IllegalArgumentException) {
+            return ReceiveResult.failure("4001", e.message ?: "Invalid request")
         }
 
         val messageId = MessageIdGenerator.generate()
         log.info("Receiving RCS message: messageId={}, partnerId={}, recipient={}",
-            messageId, request.partnerId, request.recipient)
+            messageId, message.partnerId, message.recipient.value)
 
-        val queueMessage = RcsQueueMessage(
-            messageId = messageId,
-            partnerId = request.partnerId,
-            type = request.type,
-            recipient = request.recipient,
-            content = request.content,
-            buttons = request.buttons,
-            cards = request.cards
-        )
+        val queueMessage = message.toQueueMessage(messageId)
 
         messagePublisher.publish(queueMessage)
         log.info("Published to queue: messageId={}", messageId)
 
         return ReceiveResult.success(messageId)
-    }
-
-    private fun isValidRecipient(recipient: String): Boolean {
-        return recipient.matches(Regex("^01[0-9]{8,9}$"))
     }
 }
 
@@ -56,8 +41,63 @@ data class RcsReceiveRequest(
     val type: String,
     val recipient: String,
     val content: String? = null,
-    val buttons: List<Map<String, Any?>> = emptyList(),
-    val cards: List<Map<String, Any?>> = emptyList()
+    val buttons: List<RcsButton> = emptyList(),
+    val cards: List<RcsCard> = emptyList()
+) {
+    fun toDomainModel(): RcsReceiveMessage {
+        val phoneNumber = PhoneNumber.of(recipient)
+
+        return when (type.uppercase()) {
+            "STANDALONE" -> RcsReceiveMessage.standalone(
+                partnerId = partnerId,
+                recipient = phoneNumber,
+                content = content ?: throw IllegalArgumentException("Content is required for standalone message"),
+                buttons = buttons
+            )
+            "CAROUSEL" -> RcsReceiveMessage.carousel(
+                partnerId = partnerId,
+                recipient = phoneNumber,
+                cards = cards
+            )
+            else -> throw IllegalArgumentException("Unknown message type: $type")
+        }
+    }
+}
+
+private fun RcsReceiveMessage.toQueueMessage(messageId: String): RcsQueueMessage {
+    return when (this) {
+        is RcsReceiveMessage.Standalone -> RcsQueueMessage(
+            messageId = messageId,
+            partnerId = partnerId,
+            type = "STANDALONE",
+            recipient = recipient.value,
+            content = content,
+            buttons = buttons.map { it.toMap() }
+        )
+        is RcsReceiveMessage.Carousel -> RcsQueueMessage(
+            messageId = messageId,
+            partnerId = partnerId,
+            type = "CAROUSEL",
+            recipient = recipient.value,
+            cards = cards.map { it.toMap() }
+        )
+    }
+}
+
+private fun RcsButton.toMap(): Map<String, Any?> = mapOf(
+    "type" to type.name,
+    "text" to text,
+    "url" to url,
+    "phoneNumber" to phoneNumber,
+    "payload" to payload
+)
+
+private fun RcsCard.toMap(): Map<String, Any?> = mapOf(
+    "title" to title,
+    "description" to description,
+    "mediaUrl" to mediaUrl,
+    "mediaType" to mediaType.name,
+    "buttons" to buttons.map { it.toMap() }
 )
 
 data class ReceiveResult(

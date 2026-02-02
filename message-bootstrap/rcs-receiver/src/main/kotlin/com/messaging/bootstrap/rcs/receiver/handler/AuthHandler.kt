@@ -20,11 +20,7 @@ class AuthHandler(
             objectMapper.readValue(msg.body, AuthRequest::class.java)
         } catch (e: Exception) {
             log.error("Failed to parse auth request: {}", e.message)
-            val response = ProtocolMessage.authNack(
-                msg.header.sequence,
-                """{"code":"4000","message":"Invalid request format"}"""
-            )
-            ctx.writeAndFlush(response)
+            sendNack(ctx, msg.header.sequence, "4000", "Invalid request format")
             return
         }
 
@@ -34,21 +30,25 @@ class AuthHandler(
             if (result.success) {
                 ctx.channel().attr(RcsServerHandler.AUTHENTICATED).set(true)
                 ctx.channel().attr(RcsServerHandler.PARTNER_ID).set(request.partnerId)
-
-                val response = ProtocolMessage.authAck(msg.header.sequence)
-                ctx.writeAndFlush(response)
+                ctx.writeAndFlush(ProtocolMessage.authAck(msg.header.sequence))
             } else {
-                val response = ProtocolMessage.authNack(
-                    msg.header.sequence,
-                    """{"code":"${result.errorCode}","message":"${result.errorMessage}"}"""
-                )
-                ctx.writeAndFlush(response)
+                sendNack(ctx, msg.header.sequence, result.errorCode ?: "5000", result.errorMessage ?: "Authentication failed")
             }
         }
+    }
+
+    private fun sendNack(ctx: ChannelHandlerContext, sequence: Long, code: String, message: String) {
+        val body = objectMapper.writeValueAsString(ErrorResponse(code, message))
+        ctx.writeAndFlush(ProtocolMessage.authNack(sequence, body))
     }
 }
 
 data class AuthRequest(
     val partnerId: String,
     val secretKey: String
+)
+
+data class ErrorResponse(
+    val code: String,
+    val message: String
 )

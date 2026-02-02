@@ -1,5 +1,7 @@
 package com.messaging.bootstrap.rcs.receiver.handler
 
+import com.messaging.core.rcs.domain.RcsButton
+import com.messaging.core.rcs.domain.RcsCard
 import com.messaging.infrastructure.netty.protocol.ProtocolMessage
 import com.messaging.usecase.rcs.RcsReceiveRequest
 import com.messaging.usecase.rcs.RcsReceiveUseCase
@@ -23,11 +25,7 @@ class SendHandler(
             objectMapper.readValue(msg.body, SendRequestDto::class.java)
         } catch (e: Exception) {
             log.error("Failed to parse send request: {}", e.message)
-            val response = ProtocolMessage.sendNack(
-                msg.header.sequence,
-                """{"code":"4000","message":"Invalid request format"}"""
-            )
-            ctx.writeAndFlush(response)
+            sendNack(ctx, msg.header.sequence, "4000", "Invalid request format")
             return
         }
 
@@ -44,19 +42,17 @@ class SendHandler(
             val result = rcsReceiveUseCase.receive(receiveRequest)
 
             if (result.success) {
-                val response = ProtocolMessage.sendAck(
-                    msg.header.sequence,
-                    """{"messageId":"${result.messageId}"}"""
-                )
-                ctx.writeAndFlush(response)
+                val body = objectMapper.writeValueAsString(SendAckResponse(result.messageId!!))
+                ctx.writeAndFlush(ProtocolMessage.sendAck(msg.header.sequence, body))
             } else {
-                val response = ProtocolMessage.sendNack(
-                    msg.header.sequence,
-                    """{"code":"${result.errorCode}","message":"${result.errorMessage}"}"""
-                )
-                ctx.writeAndFlush(response)
+                sendNack(ctx, msg.header.sequence, result.errorCode ?: "5000", result.errorMessage ?: "Send failed")
             }
         }
+    }
+
+    private fun sendNack(ctx: ChannelHandlerContext, sequence: Long, code: String, message: String) {
+        val body = objectMapper.writeValueAsString(ErrorResponse(code, message))
+        ctx.writeAndFlush(ProtocolMessage.sendNack(sequence, body))
     }
 }
 
@@ -64,6 +60,10 @@ data class SendRequestDto(
     val type: String,
     val recipient: String,
     val content: String? = null,
-    val buttons: List<Map<String, Any?>> = emptyList(),
-    val cards: List<Map<String, Any?>> = emptyList()
+    val buttons: List<RcsButton> = emptyList(),
+    val cards: List<RcsCard> = emptyList()
+)
+
+data class SendAckResponse(
+    val messageId: String
 )
