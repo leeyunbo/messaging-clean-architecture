@@ -7,6 +7,7 @@ package com.messaging.core.rcs.domain
 sealed class RcsReceiveMessage {
     abstract val partnerId: String
     abstract val recipient: PhoneNumber
+    abstract val typeName: String
 
     /**
      * 단일 메시지 (content 필수)
@@ -17,8 +18,14 @@ sealed class RcsReceiveMessage {
         val content: String,
         val buttons: List<RcsButton> = emptyList()
     ) : RcsReceiveMessage() {
+        override val typeName: String = TYPE_NAME
+
         init {
             require(content.isNotBlank()) { "Content must not be blank for standalone message" }
+        }
+
+        companion object {
+            const val TYPE_NAME = "STANDALONE"
         }
     }
 
@@ -30,8 +37,14 @@ sealed class RcsReceiveMessage {
         override val recipient: PhoneNumber,
         val cards: List<RcsCard>
     ) : RcsReceiveMessage() {
+        override val typeName: String = TYPE_NAME
+
         init {
             require(cards.isNotEmpty()) { "Cards must not be empty for carousel message" }
+        }
+
+        companion object {
+            const val TYPE_NAME = "CAROUSEL"
         }
     }
 

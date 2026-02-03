@@ -48,13 +48,13 @@ data class RcsReceiveRequest(
         val phoneNumber = PhoneNumber.of(recipient)
 
         return when (type.uppercase()) {
-            "STANDALONE" -> RcsReceiveMessage.standalone(
+            RcsReceiveMessage.Standalone.TYPE_NAME -> RcsReceiveMessage.standalone(
                 partnerId = partnerId,
                 recipient = phoneNumber,
                 content = content ?: throw IllegalArgumentException("Content is required for standalone message"),
                 buttons = buttons
             )
-            "CAROUSEL" -> RcsReceiveMessage.carousel(
+            RcsReceiveMessage.Carousel.TYPE_NAME -> RcsReceiveMessage.carousel(
                 partnerId = partnerId,
                 recipient = phoneNumber,
                 cards = cards
@@ -69,36 +69,20 @@ private fun RcsReceiveMessage.toQueueMessage(messageId: String): RcsQueueMessage
         is RcsReceiveMessage.Standalone -> RcsQueueMessage(
             messageId = messageId,
             partnerId = partnerId,
-            type = "STANDALONE",
+            type = typeName,
             recipient = recipient.value,
             content = content,
-            buttons = buttons.map { it.toMap() }
+            buttons = buttons
         )
         is RcsReceiveMessage.Carousel -> RcsQueueMessage(
             messageId = messageId,
             partnerId = partnerId,
-            type = "CAROUSEL",
+            type = typeName,
             recipient = recipient.value,
-            cards = cards.map { it.toMap() }
+            cards = cards
         )
     }
 }
-
-private fun RcsButton.toMap(): Map<String, Any?> = mapOf(
-    "type" to type.name,
-    "text" to text,
-    "url" to url,
-    "phoneNumber" to phoneNumber,
-    "payload" to payload
-)
-
-private fun RcsCard.toMap(): Map<String, Any?> = mapOf(
-    "title" to title,
-    "description" to description,
-    "mediaUrl" to mediaUrl,
-    "mediaType" to mediaType.name,
-    "buttons" to buttons.map { it.toMap() }
-)
 
 data class ReceiveResult(
     val success: Boolean,
