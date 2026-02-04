@@ -13,6 +13,6 @@ data class RcsQueueMessage(
     val type: String,
     val recipient: String,
     val content: String? = null,
-    val buttons: List<RcsButton> = emptyList(),
-    val cards: List<RcsCard> = emptyList()
+    val buttons: String? = null,
+    val cards: String? = null
 )

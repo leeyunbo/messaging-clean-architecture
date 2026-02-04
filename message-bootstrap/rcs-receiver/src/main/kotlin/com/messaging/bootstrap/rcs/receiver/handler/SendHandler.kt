@@ -1,7 +1,5 @@
 package com.messaging.bootstrap.rcs.receiver.handler
 
-import com.messaging.core.rcs.domain.RcsButton
-import com.messaging.core.rcs.domain.RcsCard
 import com.messaging.infrastructure.netty.protocol.ProtocolMessage
 import com.messaging.usecase.rcs.RcsReceiveRequest
 import com.messaging.usecase.rcs.RcsReceiveUseCase
@@ -9,6 +7,7 @@ import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 
 @Component
@@ -35,8 +34,8 @@ class SendHandler(
                 type = request.type,
                 recipient = request.recipient,
                 content = request.content,
-                buttons = request.buttons,
-                cards = request.cards
+                buttons = request.buttons?.toString(),
+                cards = request.cards?.toString()
             )
 
             val result = rcsReceiveUseCase.receive(receiveRequest)
@@ -60,8 +59,8 @@ data class SendRequestDto(
     val type: String,
     val recipient: String,
     val content: String? = null,
-    val buttons: List<RcsButton> = emptyList(),
-    val cards: List<RcsCard> = emptyList()
+    val buttons: JsonNode? = null,
+    val cards: JsonNode? = null
 )
 
 data class SendAckResponse(
