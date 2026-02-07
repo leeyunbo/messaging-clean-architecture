@@ -89,6 +89,11 @@ messaging-platform/
 │   ├── rabbitmq
 │   ├── webclient
 │   └── netty
+├── usecase/
+│   ├── kakao-usecase
+│   ├── rcs-usecase
+│   ├── naver-usecase
+│   └── sms-usecase
 ├── library/
 │   ├── logging
 │   └── retry
