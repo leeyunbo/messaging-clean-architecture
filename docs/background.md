@@ -31,7 +31,7 @@
 
 ## 2. 아키텍처 패턴 검토
 
-Hexagonal Architecture, Clean Architecture, Onion Architecture...
+Hexagonal Architecture, Clean Architecture
 이것들은 본질적으로 같은 원칙을 공유한다.
 - 도메인을 외부 기술로부터 분리
 - 의존성은 바깥에서 안쪽으로만
@@ -42,13 +42,14 @@ Hexagonal Architecture, Clean Architecture, Onion Architecture...
 
 ---
 
-## 3. Monorepo + Bounded Context + 재사용성
+## 3. 우리가 달성해야하는 요구사항
 
-결국 우리가 필요한 건 아래 세가지라고 생각한다.
+우리 시스템을 하나로 합치기 전에, 꼭 달성해야 하는 요구사항은 아래와 같다.
 
-1. **Monorepo**: 분산된 Gateway들을 하나의 코드베이스로
-2. **Bounded Context**: 채널별 도메인 경계를 명확하게 분리
-3. **재사용성**: 공통으로 사용되는 도메인 모듈은 재사용을 위해 DIP 원칙을 확실히 준수
+1. **하나의 프로젝트**: 분산된 Gateway들을 하나의 코드베이스로 합쳐야한다.
+2. **Bounded Context**: 아예 별개의 프로세스인만큼, 메시지 타입별 도메인 경계를 명확하게 분리해야 한다.
+3. **재사용성**: 별개의 프로세스이지만, 유사한 성질을 가지고 있는만큼 다양한 Infra, 공통 도메인 개념은 모두 재사용이 가능해야만 한다.
+4. **독립적인 프로세스**: 하나의 프로젝트인 요구사항을 만족하면서 동시에 프로세스는 서로에게 영향을 줘선 안된다.
 
 당근페이의 Clean Architecture의 모듈 구조(bootstrap, core, usecase, infrastructure, platform, library)는 이런 요구사항을 만족시키는 좋은 레퍼런스가 되었다.
 
@@ -66,6 +67,11 @@ Hexagonal Architecture, Clean Architecture, Onion Architecture...
 | **library** | Logging, Retry 등 모든 모듈에서 공통으로 사용하는 횡단 관심사 모듈 |
 | **platform** | 도메인과 관련된 외부 플랫폼을 연동한 모듈 |
 | **usecase** | 사용자 시나리오 단위의 비즈니스 로직을 작성하는 모듈 |
+
+- Monorepo를 적용했기 때문에 `요구사항 1. 하나의 프로젝트`를 만족한다.
+- 모듈을 도메인별로 분리했기 때문에 `요구사항 2. Bounded Context`를 만족한다.
+- 레이어별 모듈 분리와 DIP를 적용했기 때문에 `요구사항 3. 재사용성`을 만족한다.
+- bootstrap이 독립된 실행 단위이기 때문에 `요구사항 4. 독립적인 프로세스`를 만족한다.
 
 ---
 
